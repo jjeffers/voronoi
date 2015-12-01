@@ -29,7 +29,8 @@ defmodule Fortune.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [{:bump, "~> 0.1.0"},
-    {:heapq, "~> 0.0.1"}]
+    {:heapq, "~> 0.0.1"},
+    {:red_black_tree, "~> 1.2"}]
 
   end
 
