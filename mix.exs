@@ -30,7 +30,8 @@ defmodule Fortune.Mixfile do
   defp deps do
     [{:bump, "~> 0.1.0"},
     {:heapq, "~> 0.0.1"},
-    {:red_black_tree, "~> 1.2"}]
+    {:red_black_tree, "~> 1.2"},
+    {:sorted_set, "~> 1.0"}]
 
   end
 

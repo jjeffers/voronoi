@@ -53,4 +53,5 @@ defmodule GeometryTest do
     assert_in_delta point.x, -0.039, 0.01
     assert_in_delta point.y, 6.07, 0.01
   end
+
 end
