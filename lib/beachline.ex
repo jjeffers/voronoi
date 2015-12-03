@@ -23,7 +23,7 @@ defmodule Beachline do
         arc = Enum.at(beachline, mid)
 
         case compare_breakpoints(
-          site.x, Enum.at(beachline, mid-1), arc, Enum.at(beachline, mid+1), y) do
+          site, Enum.at(beachline, mid-1), arc, Enum.at(beachline, mid+1)) do
             -1 -> binsearch(beachline, site, y, lo, mid-1)
             0 -> mid
             1 -> binsearch(beachline, site, y, mid+1, hi)
@@ -33,15 +33,15 @@ defmodule Beachline do
 
   end
 
-  def compare_breakpoints(x_pos, arc_left, arc_mid, arc_right, y) do
+  def compare_breakpoints(site, arc_left, arc_mid, arc_right) do
 
-    left_breakpoint = Geometry.intersection(arc_mid, arc_left, y)
-    right_breakpoint = Geometry.intersection(arc_right, arc_mid, y)
+    left_breakpoint = Geometry.intersection(arc_mid, arc_left, site.y)
+    right_breakpoint = Geometry.intersection(arc_right, arc_mid, site.y)
 
     cond do
-      x_pos >= left_breakpoint.x and x_pos <= right_breakpoint.x -> 0
-      x_pos < left_breakpoint.x -> -1
-      x_pos > right_breakpoint.x -> 1
+      site.x >= left_breakpoint.x and site.x <= right_breakpoint.x -> 0
+      site.x < left_breakpoint.x -> -1
+      site.x > right_breakpoint.x -> 1
       true -> 0
     end
 

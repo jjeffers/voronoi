@@ -28,9 +28,8 @@ defmodule BeachlineTest do
     arc_c = %Point{ x: 40, y: 22 }
 
     site = %Point{ x: 25, y: 10 }
-    sweep_line_y = 10
 
-    assert Beachline.compare_breakpoints(site.x, arc_a, arc_b, arc_c, 10) == -1
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c) == -1
 
   end
 
@@ -40,9 +39,8 @@ defmodule BeachlineTest do
     arc_c = %Point{ x: 40, y: 22 }
 
     site = %Point{ x: 27, y: 10 }
-    sweep_line_y = 10
 
-    assert Beachline.compare_breakpoints(site.x, arc_a, arc_b, arc_c, 10) == 0
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c) == 0
 
   end
 
@@ -52,9 +50,39 @@ defmodule BeachlineTest do
     arc_c = %Point{ x: 40, y: 22 }
 
     site = %Point{ x: 37, y: 10 }
-    sweep_line_y = 10
 
-    assert Beachline.compare_breakpoints(site.x, arc_a, arc_b, arc_c, 10) == 1
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c) == 1
+
+  end
+
+
+  test "with l=2, for an arc A from focus at (20,15), split by an arc B with focus at (18,5), site at (10,2) falls into arc A" do
+    arc_a = %Point{ x: 20, y: 15 }
+    arc_b = %Point{ x: 18, y: 5 }
+
+    site = %Point{ x: 10, y: 2 }
+
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == -1
+
+  end
+
+  test "with l=2, for an arc A from focus at (20,15), split by an arc B with focus at (18,5), site at (14,2) falls into arc B" do
+    arc_a = %Point{ x: 20, y: 15 }
+    arc_b = %Point{ x: 18, y: 5 }
+
+    site = %Point{ x: 14, y: 2 }
+
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == 0
+
+  end
+
+  test "with l=2, for an arc A from focus at (20,15), split by an arc B with focus at (18,5), site at (24,2) falls into arc B" do
+    arc_a = %Point{ x: 20, y: 15 }
+    arc_b = %Point{ x: 18, y: 5 }
+
+    site = %Point{ x: 14, y: 2 }
+
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == 0
 
   end
 end
