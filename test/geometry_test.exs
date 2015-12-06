@@ -54,4 +54,23 @@ defmodule GeometryTest do
     assert_in_delta point.y, 6.07, 0.01
   end
 
+  test "2 sites of 3 the same will not be distinct" do
+    a = %Point{ x: 12, y: 10 }
+    b = %Point{ x: 12, y: 9 }
+
+    refute Geometry.distinct(a, a, b)
+    refute Geometry.distinct(a, b, a)
+    refute Geometry.distinct(b, a, a)
+
+  end
+
+  test "2 sites of 3 the same will be distinct" do
+    a = %Point{ x: 12, y: 10 }
+    b = %Point{ x: 12, y: 9 }
+    c = %Point{ x: 6, y: 11 }
+
+    assert Geometry.distinct(a, b, c)
+
+  end
+
 end

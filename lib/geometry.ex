@@ -16,11 +16,31 @@ defmodule Geometry do
       :math.pow(point_a.y - point_b.y, 2))
   end
 
+  def parabola(nil, _) do
+    raise "Focus was nil."
+  end
+
+  def parabola(_, nil) do
+    raise "Directrix y coordinate was nil."
+  end
+
   def parabola(focus, directrix_y) do
     vertex = midpoint(
       %Line{ origin: focus, destination: %Point{ x: focus.x, y: directrix_y }})
 
     { vertex, vertex.y - directrix_y }
+  end
+
+  def intersection(nil, _, _) do
+    raise "First point argument was nil."
+  end
+
+  def intersection(_, nil, _) do
+    raise "Second point argument was nil."
+  end
+
+  def intersection(_, _, nil) do
+    raise "Directrix y coordinate was nil."
   end
 
   def intersection(point_a, point_b, y) do
@@ -43,12 +63,20 @@ defmodule Geometry do
 
         x = (-b - :math.sqrt(b*b - 4*a*c))/(2*a)
 
-
     end
 
     y = ((x-vertex_a.x)*(x-vertex_a.x))/(4*p_a) + vertex_a.y
 
     %Point{ x: x, y: y }
 
+  end
+
+  def distinct(point_a, point_b, point_c) do
+    cond do
+      point_a.x == point_b.x and point_a.y == point_b.y -> false
+      point_a.x == point_c.x and point_a.y == point_c.y -> false
+      point_b.x == point_c.x and point_b.y == point_c.y -> false
+      true -> true
+    end
   end
 end

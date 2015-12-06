@@ -1,19 +1,30 @@
 defmodule Beachline do
 
-  def find_arc(beachline, site, y) do
-    index = Beachline.binsearch(beachline, site, y)
+  def find_arc(beachline, site) do
+    index = Beachline.binsearch(beachline, site)
     [ index: index, arc: Enum.at(beachline, index) ]
   end
 
-  def binsearch(beachline, site, y) do
-    binsearch(beachline, site, y, 0, length(beachline))
+  def insert([], index, new_arc) do
+    [new_arc]
   end
 
-  defp binsearch(beachline, _site, y, lo, hi) when hi < lo do
+  def insert(beachline, index, new_arc) do
+    arc = Enum.at(beachline, index)
+    List.insert_at(beachline, index, arc)
+    |>  List.replace_at(index+1, new_arc)
+    |>  List.insert_at(index+2, arc)
+  end
+
+  def binsearch(beachline, site) do
+    binsearch(beachline, site, 0, length(beachline))
+  end
+
+  defp binsearch(beachline, _site, lo, hi) when hi < lo do
     -1
   end
 
-  defp binsearch(beachline, site, y, lo, hi) do
+  defp binsearch(beachline, site, lo, hi) do
 
     mid = div(lo + hi, 2)
 
@@ -24,12 +35,23 @@ defmodule Beachline do
 
         case compare_breakpoints(
           site, Enum.at(beachline, mid-1), arc, Enum.at(beachline, mid+1)) do
-            -1 -> binsearch(beachline, site, y, lo, mid-1)
+            -1 -> binsearch(beachline, site, lo, mid-1)
             0 -> mid
-            1 -> binsearch(beachline, site, y, mid+1, hi)
+            1 -> binsearch(beachline, site, mid+1, hi)
         end
 
       end
+
+  end
+
+  def compare_breakpoints(site, arc_left, arc_mid, nil) do
+
+    left_breakpoint = Geometry.intersection(arc_mid, arc_left, site.y)
+
+    cond do
+      site.x < left_breakpoint.x -> -1
+      true -> 0
+    end
 
   end
 

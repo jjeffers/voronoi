@@ -5,20 +5,27 @@ defmodule BeachlineTest do
   test "a beachline with a single arc contains any new single site" do
     arc = %Point{ x: 10, y: 100 }
     site = %Point{ x: 6, y: 80 }
-    sweep_line_y = 80
 
     assert [arc]
-      |> Beachline.find_arc(site, sweep_line_y) == [ index: 0, arc: arc ]
+      |> Beachline.find_arc(site) == [ index: 0, arc: arc ]
+
+  end
+
+  test "a beachline no arcs returns bad index and null arc" do
+
+    site = %Point{ x: 6, y: 80 }
+
+    assert []
+      |> Beachline.find_arc(site) == [ index: 0, arc: nil ]
 
   end
 
   test "a beachline with three arcs matches a site" do
     arc = %Point{ x: 10, y: 100 }
     site = %Point{ x: 6, y: 80 }
-    sweep_line_y = 80
 
     assert [arc]
-      |> Beachline.find_arc(site, sweep_line_y) == [ index: 0, arc: arc ]
+      |> Beachline.find_arc(site) == [ index: 0, arc: arc ]
 
   end
 
@@ -85,4 +92,10 @@ defmodule BeachlineTest do
     assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == 0
 
   end
+
+  test "inserting an arc splits the current arc" do
+      assert ["a", "b", "c"]
+        |> Beachline.insert(1, "z") == ["a", "b", "z", "b", "c"]
+  end
+
 end
