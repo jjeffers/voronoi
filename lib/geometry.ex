@@ -43,6 +43,10 @@ defmodule Geometry do
     raise "Directrix y coordinate was nil."
   end
 
+  def intersection(point_a, point_a, _) do
+    point_a
+  end
+
   def intersection(point_a, point_b, y) do
 
     { vertex_a, p_a } = parabola(point_a, y)

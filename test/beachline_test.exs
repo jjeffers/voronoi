@@ -7,7 +7,7 @@ defmodule BeachlineTest do
     site = %Point{ x: 6, y: 80 }
 
     assert [arc]
-      |> Beachline.find_arc(site) == [ index: 0, arc: arc ]
+      |> Beachline.find_arc(site, site.y) == [ index: 0, arc: arc ]
 
   end
 
@@ -20,12 +20,22 @@ defmodule BeachlineTest do
 
   end
 
+  test "finds an arc in large beachline" do
+    beachline = [
+      %Point{x: 56, y: 499}, %Point{x: 279, y: 462}, %Point{x: 326, y: 460},
+      %Point{x: 279, y: 462}, %Point{x: 56, y: 499}]
+
+    assert [ index: 1, arc: %Point{x: 279, y: 462}] ==
+      Beachline.find_arc(beachline, %Point{x: 279, y: 462})
+
+  end
+
   test "a beachline with three arcs matches a site" do
     arc = %Point{ x: 10, y: 100 }
     site = %Point{ x: 6, y: 80 }
 
     assert [arc]
-      |> Beachline.find_arc(site) == [ index: 0, arc: arc ]
+      |> Beachline.find_arc(site) == [ index: 0, arc: nil ]
 
   end
 
@@ -36,7 +46,7 @@ defmodule BeachlineTest do
 
     site = %Point{ x: 25, y: 10 }
 
-    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c) == -1
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c, site.y) == -1
 
   end
 
@@ -47,7 +57,7 @@ defmodule BeachlineTest do
 
     site = %Point{ x: 27, y: 10 }
 
-    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c) == 0
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c, site.y) == 0
 
   end
 
@@ -58,7 +68,7 @@ defmodule BeachlineTest do
 
     site = %Point{ x: 37, y: 10 }
 
-    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c) == 1
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_c, site.y) == 1
 
   end
 
@@ -69,7 +79,7 @@ defmodule BeachlineTest do
 
     site = %Point{ x: 10, y: 2 }
 
-    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == -1
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a, site.y) == -1
 
   end
 
@@ -79,7 +89,7 @@ defmodule BeachlineTest do
 
     site = %Point{ x: 14, y: 2 }
 
-    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == 0
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a, site.y) == 0
 
   end
 
@@ -89,8 +99,14 @@ defmodule BeachlineTest do
 
     site = %Point{ x: 14, y: 2 }
 
-    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a) == 0
+    assert Beachline.compare_breakpoints(site, arc_a, arc_b, arc_a, site.y) == 0
 
+  end
+
+  test "inserting an arc into an empty list" do
+      assert []
+        |> Beachline.insert(0, %Point{ x: 12, y: 5}) ==
+        [ beachline: [%Point{ x: 12, y: 5}], indicies: [0]]
   end
 
   test "inserting an arc splits the current arc" do
