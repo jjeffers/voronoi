@@ -73,4 +73,25 @@ defmodule GeometryTest do
 
   end
 
+  test "identify a circle" do
+    a = %Point{ x: -3, y: 5 }
+    b = %Point{ x: 0, y: 6.243 }
+    c = %Point{ x: 3.742, y: 0 }
+
+    %Point{ x: x, y: y } = Geometry.circle(a, b, c)
+
+    assert_in_delta x, 0, 0.01
+    assert_in_delta y, 2, 0.01
+  end
+
+  test "colinear returns true for 3 points on a line" do
+    assert Geometry.colinear(%Point{ x: -4, y: -1}, %Point{ x: 0, y: 5}, %Point{ x: -2, y: 2})
+  end
+
+  test "colinear returns false for 3 points on a circle" do
+    refute Geometry.colinear(%Point{ x: 0, y: 6.243}, %Point{ x: -3, y: 5}, %Point{ x: 3.742, y: 0})
+  end
+
+
+
 end

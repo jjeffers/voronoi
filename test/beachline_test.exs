@@ -95,7 +95,17 @@ defmodule BeachlineTest do
 
   test "inserting an arc splits the current arc" do
       assert ["a", "b", "c"]
-        |> Beachline.insert(1, "z") == ["a", "b", "z", "b", "c"]
+        |> Beachline.insert(1, "z") == [ beachline: ["a", "b", "z", "b", "c"], indicies: [1, 2, 3]]
+  end
+
+  test "inserting an arc at the beginning splits the current arc" do
+      assert ["a", "b", "c"]
+        |> Beachline.insert(0, "z") == [beachline: ["a", "z", "a", "b", "c"], indicies: [0, 1, 2]]
+  end
+
+  test "inserting an arc at the end splits the current arc" do
+      assert ["a", "b", "c"]
+        |> Beachline.insert(2, "z") == [beachline: ["a", "b", "c", "z", "c"], indicies: [2, 3, 4]]
   end
 
 end

@@ -79,4 +79,29 @@ defmodule Geometry do
       true -> true
     end
   end
+
+  def circle(a, b, c) do
+    cond do
+      colinear(a, b, c) -> false
+      true -> compute_midpoint(a, b, c)
+    end
+  end
+
+  def compute_midpoint(point_a, point_b, point_c) do
+
+    a = point_b.x - point_a.x
+    b = point_b.y - point_a.y
+    c = point_c.x - point_a.x
+    d = point_c.y - point_a.y
+
+    e = (a * (point_a.x+point_b.x)) + (b * (point_a.y+point_b.y))
+    f = (c * (point_a.x+point_c.x)) + (d * (point_a.y+point_c.y))
+    g = 2 * ((a * (point_c.y-point_b.y)) - (b * (point_c.x-point_b.x)))
+
+    %Point{ x: ((d*e)-(b*f))/g, y: ((a*f)-(c*e))/g }
+  end
+
+  def colinear(a, b, c) do
+    (a.x*(b.y-c.y)) + (b.x*(c.y - a.y)) + (c.x*(a.y-b.y)) == 0
+  end
 end

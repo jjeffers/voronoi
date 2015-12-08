@@ -14,7 +14,7 @@ defmodule EventQueueTest do
       |> EventQueue.push(3, ["not", "our", "triple"])
 
     assert old_queue
-      |> EventQueue.remove_any(["a", "b", "c"])
+      |> EventQueue.remove(["a", "b", "c"])
       |> EventQueue.to_list == EventQueue.to_list(new_queue)
   end
 
@@ -25,7 +25,7 @@ defmodule EventQueueTest do
       |> EventQueue.push(3, ["not", "our", "triple"])
 
       assert old_queue
-      |> EventQueue.remove_any("globnard")
+      |> EventQueue.remove("globnard")
       |> EventQueue.to_list == EventQueue.to_list(old_queue)
   end
 

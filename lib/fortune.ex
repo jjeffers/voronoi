@@ -22,26 +22,59 @@ defmodule Fortune do
 
   def sweep(rect, {:empty, _}, beachline, canvas, _) do
     IO.puts "done"
-    IO.inspect beachline
   end
+
 
   def sweep(rect, {{:value, priority, site}, queue}, beachline, canvas, current_frame) do
 
-    IO.puts "site event"
-    IO.inspect site
-
     [ index: index, arc: arc ] = Beachline.find_arc(beachline, site)
 
-    old_triple = [Enum.at(index-1), arc, Enum.at(index+1)]
+    cond do
+      index > 0 and index < Enum.count(beachline) ->
+        old_triple = [Enum.at(beachline, index-1), arc, Enum.at(beachline, index+1)]
+        queue = EventQueue.remove(queue, old_triple)
+      true ->
+    end
 
-    queue = EventQueue.remove(queue, old_triple)
+    [ beachline: beachline, indicies: indicies] = Beachline.insert(beachline, index, site)
 
-    beachline = Beachline.insert(beachline, index, site)
+    generate_vertext_events(queue, beachline, indicies, site.y)
 
-    Drawing.draw_sweep_line_image(canvas, rect.size.width, site.y, current_frame)
+    Drawing.draw_frame(canvas, rect.size.width, site.y, beachline, current_frame)
 
     sweep(rect, EventQueue.pop(queue), beachline, canvas, current_frame+1)
   end
 
+  def generate_vertext_events(queue, beachline, indicies, sweep_line_y) do
+    { queue, beachline } = generate_vertext_event(queue, beachline, indicies[0], sweep_line_y)
+    generate_vertext_event(queue, beachline, indicies[2], sweep_line_y)
+  end
+
+  def generate_vertext_event(queue, beachline, midarc_index, sweep_line_y) do
+    cond do
+      midarc_index > 0 and midarc_index < Enum.count(beachline) ->
+        a = beachline[midarc_index-1]
+        b = beachline[midarc_index]
+        c = beachline[midarc_index+1]
+
+        handle_circle_midpoint(queue, beachline, Geometry.circle(a, b, c), [a, b, c], sweep_line_y)
+      true -> { queue, beachline }
+    end
+
+  end
+
+  defp handle_circle_midpoint(queue, beachline, false, _, _) do
+    { queue, beachline }
+  end
+
+  defp handle_circle_midpoint(queue, beachline, midpoint, triple, sweep_line_y) do
+    radius = Geometry.distance(midpoint, triple[0])
+
+    cond do
+      midpoint.y - radius < sweep_line_y ->
+        EventQueue.push(queue, sweep_line_y, triple)
+      true -> { queue, beachline }
+    end
+  end
 
 end

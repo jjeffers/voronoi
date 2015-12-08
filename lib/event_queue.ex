@@ -10,7 +10,7 @@ defmodule EventQueue do
     HeapQueue.pop(queue)
   end
 
-  def remove_any(queue, event_to_remove) do
+  def remove(queue, event_to_remove) do
     _remove_any(EventQueue.pop(queue), event_to_remove, EventQueue.new)
   end
 

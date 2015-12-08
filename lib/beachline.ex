@@ -11,9 +11,10 @@ defmodule Beachline do
 
   def insert(beachline, index, new_arc) do
     arc = Enum.at(beachline, index)
-    List.insert_at(beachline, index, arc)
+    new_beachline = List.insert_at(beachline, index, arc)
     |>  List.replace_at(index+1, new_arc)
     |>  List.insert_at(index+2, arc)
+    [ beachline: new_beachline, indicies: [index, index+1, index+2]]
   end
 
   def binsearch(beachline, site) do
