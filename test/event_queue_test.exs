@@ -18,7 +18,22 @@ defmodule EventQueueTest do
       |> EventQueue.to_list == EventQueue.to_list(new_queue)
   end
 
-  test "idempotent if no match" do
+  test "we can filter out any tripe of arcs that matches a given arc" do
+    old_queue = EventQueue.new
+      |> EventQueue.push(1, ["a", %Point{ x: 5, y: 8}, "c"])
+      |> EventQueue.push(2, "some other thing")
+      |> EventQueue.push(3, ["not", "our", "triple"])
+
+    new_queue = EventQueue.new
+      |> EventQueue.push(2, "some other thing")
+      |> EventQueue.push(3, ["not", "our", "triple"])
+
+    assert old_queue
+      |> EventQueue.remove_with_arc(%Point{ x: 5, y: 8})
+      |> EventQueue.to_list == EventQueue.to_list(new_queue)
+  end
+
+  test "remove idempotent if no match" do
       old_queue = EventQueue.new
       |> EventQueue.push(1, ["a", "b", "c"])
       |> EventQueue.push(2, "some other thing")
