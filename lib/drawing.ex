@@ -23,6 +23,13 @@ defmodule Drawing do
   def draw_frame(canvas, line_width, line_position, beachline, frame_number) do
     sweep_line_canvas = draw_sweep_line(canvas, line_width, line_position)
 
+    beachline = Enum.reduce beachline, [], fn point, acc ->
+      cond do
+        point.y == line_position -> acc
+        true -> [point | acc]
+      end
+    end
+
     cavas_final = draw_beachline(sweep_line_canvas, beachline, line_position)
 
     Bump.write(
@@ -35,23 +42,39 @@ defmodule Drawing do
   end
 
   defp draw_beachline(canvas, beachline, line_position) do
+
+    beachline = Beachline.insert_breakpoints(beachline, line_position)
+
     current_focus = hd(beachline)
 
+    IO.inspect beachline
     new_canvas = draw_parabola(canvas, current_focus, line_position)
 
     draw_beachline(new_canvas, tl(beachline), line_position)
   end
 
-  defp draw_parabola(canvas, %Point{ x: _, y: y}, y) do
+  defp draw_parabola(canvas, %{left: _, site: %Point{ x: _, y: y}, right: _ }, y) do
     canvas
   end
 
-  defp draw_parabola(canvas, focus, directrix_y) do
+  defp draw_parabola(canvas, %{left: left, site: focus, right: right }, directrix_y) do
 
     { vertex, p } = Geometry.parabola(focus, directrix_y)
 
     width = Canvas.size(canvas).width
-    queue = Enum.reduce 1..width, canvas, fn x, acc ->
+
+    cond do
+      left == nil -> x_start = 1
+      true -> x_start = left.x
+    end
+
+    cond do
+      right == nil -> x_end = width
+      true -> x_end = right.x
+    end
+
+
+    queue = Enum.reduce x_start..x_end, canvas, fn x, acc ->
 
       y = (1/(4*p))*((x-vertex.x)*(x-vertex.x))+vertex.y
 

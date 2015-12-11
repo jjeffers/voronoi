@@ -1,5 +1,6 @@
 defmodule Beachline do
 
+
   def find_arc(beachline, site, directrix_y) do
     index = Beachline.binsearch(beachline, site, directrix_y)
     [ index: index, arc: Enum.at(beachline, index) ]

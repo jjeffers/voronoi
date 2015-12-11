@@ -31,16 +31,16 @@ defmodule Fortune do
     [ index: index, arc: arc ] = Beachline.find_arc(beachline, arc_b)
 
     beachline = Beachline.delete(beachline, arc)
+    queue = EventQueue.remove_with_arc(queue, arc)
+    queue = generate_vertex_events(rect, queue, beachline, [index-1,nil,index], priority)
 
-    #Drawing.draw_frame(canvas, rect.size.width, priority, beachline, current_frame)
-
-    sweep(rect, EventQueue.pop(queue), beachline, canvas, current_frame+1)
+    sweep(rect, EventQueue.pop(queue), beachline, canvas, current_frame)
   end
 
 
   def sweep(rect, {{:value, priority, site}, queue}, beachline, canvas, current_frame) do
 
-    IO.puts "site event - priority #{priority}"
+    IO.puts "site event #{current_frame} - priority #{priority}"
 
     [ index: index, arc: arc ] = Beachline.find_arc(beachline, site, site.y)
 
@@ -51,6 +51,7 @@ defmodule Fortune do
       true ->
     end
 
+    #IO.puts "\tinserting site (#{site.x}, #{site.y}) into beachline"
     [ beachline: new_beachline, indicies: indicies] = Beachline.insert(beachline, index, site)
 
     queue = generate_vertex_events(rect, queue, new_beachline, indicies, site.y)
@@ -89,8 +90,7 @@ defmodule Fortune do
 
     cond do
       midpoint.y - radius < sweep_line_y ->
-        IO.puts "adding a vertex event at priority #{rect.size.height - sweep_line_y}"
-        EventQueue.push(queue, rect.size.height - sweep_line_y, triple)
+        EventQueue.push(queue, rect.size.height - (midpoint.y - radius), triple)
       true -> queue
     end
   end

@@ -124,4 +124,5 @@ defmodule BeachlineTest do
         |> Beachline.insert(2, "z") == [beachline: ["a", "b", "c", "z", "c"], indicies: [2, 3, 4]]
   end
 
+
 end

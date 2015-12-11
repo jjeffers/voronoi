@@ -69,10 +69,18 @@ defmodule Geometry do
 
     end
 
-    y = ((x-vertex_a.x)*(x-vertex_a.x))/(4*p_a) + vertex_a.y
+    y = parabola_y(vertex_a, x, p_a)
 
     %Point{ x: x, y: y }
 
+  end
+
+  def parabola_y(_, _, 0.0) do
+    {:error, "Length of p cannot be 0"}
+  end
+
+  def parabola_y(vertex, x, p) do
+    ((x-vertex.x)*(x-vertex.x))/(4*p) + vertex.y
   end
 
   def distinct(point_a, point_b, point_c) do
