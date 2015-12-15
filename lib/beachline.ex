@@ -1,6 +1,5 @@
 defmodule Beachline do
 
-
   def find_arc(beachline, site, directrix_y) do
     index = Beachline.binsearch(beachline, site, directrix_y)
     [ index: index, arc: Enum.at(beachline, index) ]
@@ -52,7 +51,11 @@ defmodule Beachline do
   end
 
   defp binsearch(beachline, _site, lo, hi, _) when hi < lo do
-    -1
+    0
+  end
+
+  defp binsearch(beachline, _site, lo, hi, _) when lo > hi do
+    Enum.count(beachline)
   end
 
   defp binsearch(beachline, site, lo, hi, directrix_y) do
@@ -86,6 +89,17 @@ defmodule Beachline do
 
   end
 
+  def compare_breakpoints(site, nil, arc_mid, arc_right, directrix_y) do
+
+    right_breakpoint = Geometry.intersection(arc_right, arc_mid, directrix_y)
+
+    cond do
+      site.x > right_breakpoint.x -> 1
+      true -> 0
+    end
+
+  end
+
   def compare_breakpoints(site, arc_left, arc_mid, arc_right, directrix_y) do
 
     left_breakpoint = Geometry.intersection(arc_mid, arc_left, directrix_y)
@@ -100,4 +114,10 @@ defmodule Beachline do
 
   end
 
+end
+
+defimpl String.Chars, for: Beachline do
+  def to_string(beachline) do
+    String.Chars.to_string(beachline)
+  end
 end

@@ -43,38 +43,48 @@ defmodule Drawing do
 
   defp draw_beachline(canvas, beachline, line_position) do
 
-    beachline = Beachline.insert_breakpoints(beachline, line_position)
-
     current_focus = hd(beachline)
 
-    IO.inspect beachline
     new_canvas = draw_parabola(canvas, current_focus, line_position)
 
     draw_beachline(new_canvas, tl(beachline), line_position)
   end
 
-  defp draw_parabola(canvas, %{left: _, site: %Point{ x: _, y: y}, right: _ }, y) do
+  def draw_voronoi_diagram(canvas, voronoi_diagram) do
+    IO.puts "there are #{Enum.count(voronoi_diagram)} voronoi vertices"
+    IO.inspect voronoi_diagram
+    final_canvas = draw_voronoi_diagram_vertex(canvas, voronoi_diagram)
+
+    Bump.write(
+      filename: "images/voronoi.bmp",
+      canvas: final_canvas)
+
+  end
+
+  defp draw_voronoi_diagram_vertex(canvas, []) do
     canvas
   end
 
-  defp draw_parabola(canvas, %{left: left, site: focus, right: right }, directrix_y) do
+  defp draw_voronoi_diagram_vertex(canvas, voronoi_diagram) do
+    point = hd(voronoi_diagram)
+    new_canvas = Canvas.fill(canvas, color: Color.named(:orange),
+                   rect: %Rect{ size: %Size{height: 1, width: 1},
+                 origin: %Point{ x: point.x, y: point.y }})
+
+    draw_voronoi_diagram_vertex(new_canvas, tl(voronoi_diagram))
+  end
+
+  defp draw_parabola(canvas, %Point{ x: _, y: y}, y) do
+    canvas
+  end
+
+  defp draw_parabola(canvas, focus, directrix_y) do
 
     { vertex, p } = Geometry.parabola(focus, directrix_y)
 
     width = Canvas.size(canvas).width
 
-    cond do
-      left == nil -> x_start = 1
-      true -> x_start = left.x
-    end
-
-    cond do
-      right == nil -> x_end = width
-      true -> x_end = right.x
-    end
-
-
-    queue = Enum.reduce x_start..x_end, canvas, fn x, acc ->
+    queue = Enum.reduce 1..width, canvas, fn x, acc ->
 
       y = (1/(4*p))*((x-vertex.x)*(x-vertex.x))+vertex.y
 

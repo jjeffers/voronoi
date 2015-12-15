@@ -2,7 +2,18 @@ defmodule Line do
   defstruct origin: %Point{}, destination: %Point{}
 end
 
+defimpl String.Chars, for: Point do
+  def to_string(point) do
+    "(#{point.x},#{point.y})"
+  end
+end
+
 defmodule Geometry do
+
+  def assert_equal(point_a, point_b, delta \\ 0.01) do
+    ExUnit.Assertions.assert_in_delta point_a.x, point_b.x, delta
+    ExUnit.Assertions.assert_in_delta point_a.y, point_b.y, delta
+  end
 
   def midpoint(line) do
     %Point{

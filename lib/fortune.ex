@@ -5,44 +5,116 @@ end
 defmodule Fortune do
 
   def main(_) do
-    :random.seed(:erlang.now)
     rect = %Rect{
-      size: %Size{height: 500, width: 500},
+      size: %Size{height: 110, width: 110},
       origin: %Point{ x: 0, y: 0}
     }
 
-    random_points = RandomPoints.generate_random_points(rect, 50)
 
-    queue = Enum.reduce random_points, EventQueue.new(), fn point, acc ->
+    points = [
+      %Point{ x: 0, y: 0},
+      %Point{ x: 0, y: 100},
+      %Point{ x: 20, y: 50},
+      %Point{ x: 30, y: 60},
+      %Point{ x: 40, y: 50},
+      %Point{ x: 60, y: 30},
+      %Point{ x: 60, y: 50},
+      %Point{ x: 100, y: 0},
+      %Point{ x: 100, y: 100},
+    ]
+
+    diagram = fortune(rect, Enum.sort(points, &(&1.y > &2.y)))
+    IO.puts "Voronoi vertices: (#{Enum.count(diagram)})"
+    IO.inspect diagram
+  end
+
+  def random_start do
+    :random.seed(:erlang.now)
+    rect = %Rect{
+      size: %Size{height: 100, width: 100},
+      origin: %Point{ x: 0, y: 0}
+    }
+
+    random_points = RandomPoints.generate_random_points(rect, 5)
+
+    fortune(rect, random_points)
+    #Drawing.draw_voronoi_diagram(canvas, voronoi_diagram)
+
+  end
+
+  def fortune(rect, points) do
+    queue = Enum.reduce points, EventQueue.new(), fn point, acc ->
       EventQueue.push(acc, rect.size.height - point.y, point)
     end
 
-    sweep(rect, EventQueue.pop(queue), [], Drawing.create_base_canvas(rect, random_points), 1)
+    sweep(rect, EventQueue.pop(queue), [], [])
   end
 
-  def sweep(rect, {:empty, _}, beachline, canvas, _) do
-    IO.puts "done"
+  def sweep(rect, {:empty, _}, beachline, voronoi_diagram) do
+    voronoi_diagram
   end
 
-  def sweep(rect, {{:value, priority, [arc_a, arc_b, arc_c]}, queue}, beachline, canvas, current_frame) do
-    IO.puts "vertex event priority #{priority}, removing arc:"
+  def sweep(rect, {{:value, priority, [arc_a, arc_b, arc_c]}, queue}, beachline,
+    voronoi_diagram) do
+
+    IO.puts "\nvertex event priority #{priority}, removing arc:"
     IO.inspect arc_b
 
     [ index: index, arc: arc ] = Beachline.find_arc(beachline, arc_b)
+    IO.puts "index of arc: #{index}"
 
+    IO.puts "removing this arc from beachline, before"
+    IO.inspect beachline
     beachline = Beachline.delete(beachline, arc)
+    IO.puts "removing this arc from beachline, after"
+    IO.inspect beachline
+
+    IO.puts "removing any events using this arc, before"
+    IO.inspect queue
     queue = EventQueue.remove_with_arc(queue, arc)
+    IO.puts "removing any events using this arc, after"
+    IO.inspect queue
+
+    # remove old triples [arc_X, arc_a, arc_b] and [arc_b, arc_c, arc_Y] here!
+    if index > 1 do
+      IO.puts "REMOVING OLD TRIPLES left"
+      queue = EventQueue.remove(queue, [Enum.at(beachline, index-2), Enum.at(beachline, index-1), arc_b])
+    end
+
+    if index < Enum.count(beachline)-1 do
+      IO.puts "REMOVING OLD TRIPLES right"
+      IO.inspect [arc_b, Enum.at(beachline, index+1),
+        Enum.at(beachline, index+2)]
+      IO.puts "removing any events before"
+      IO.inspect queue
+
+      queue = EventQueue.remove(queue, [arc_b, Enum.at(beachline, index+1),
+        Enum.at(beachline, index+2)])
+        IO.puts "removing any events after"
+        IO.inspect queue
+    end
+
     queue = generate_vertex_events(rect, queue, beachline, [index-1,nil,index], priority)
 
-    sweep(rect, EventQueue.pop(queue), beachline, canvas, current_frame)
+    midpoint = Geometry.circle(arc_a, arc_b, arc_c)
+
+    sweep(rect, EventQueue.pop(queue), beachline, [ midpoint | voronoi_diagram])
   end
 
 
-  def sweep(rect, {{:value, priority, site}, queue}, beachline, canvas, current_frame) do
+  def sweep(rect, {{:value, priority, site}, queue}, beachline, voronoi_diagram) do
 
-    IO.puts "site event #{current_frame} - priority #{priority}"
+    IO.puts "\nsite event #{site.x},#{site.y} - priority #{priority}"
+
+    IO.puts "\tcurrent beachline"
+    IO.inspect beachline
 
     [ index: index, arc: arc ] = Beachline.find_arc(beachline, site, site.y)
+
+    cond do
+      arc == nil -> IO.puts "\tsite has no arc to split because the beachline is empty."
+      true -> IO.puts "\tsite will split arc from focus at index #{index} (#{arc.x}, #{arc.y})"
+    end
 
     cond do
       index > 0 and index < Enum.count(beachline) ->
@@ -56,9 +128,9 @@ defmodule Fortune do
 
     queue = generate_vertex_events(rect, queue, new_beachline, indicies, site.y)
 
-    Drawing.draw_frame(canvas, rect.size.width, site.y, new_beachline, current_frame)
+    #Drawing.draw_frame(canvas, rect.size.width, site.y, new_beachline, current_frame)
 
-    sweep(rect, EventQueue.pop(queue), new_beachline, canvas, current_frame+1)
+    sweep(rect, EventQueue.pop(queue), new_beachline, voronoi_diagram)
   end
 
   def generate_vertex_events(rect, queue, beachline, indicies, sweep_line_y) do
@@ -67,10 +139,13 @@ defmodule Fortune do
   end
 
   def generate_vertex_event(rect, queue, beachline, midarc_index, sweep_line_y) do
-
+    IO.puts "Checking vertext event"
+    IO.puts "\tcurrent beachline"
+    IO.inspect beachline
+    IO.puts "\tmidarc index #{midarc_index} (checking either side of that arc)"
     cond do
-      midarc_index > 1 and midarc_index < Enum.count(beachline)-1 ->
-
+      midarc_index > 0 and midarc_index < Enum.count(beachline)-1 ->
+        IO.puts "\twe have a triple - so we'll create a vertex event"
         a = Enum.at(beachline, midarc_index-1)
         b = Enum.at(beachline, midarc_index)
         c = Enum.at(beachline, midarc_index+1)
@@ -86,10 +161,15 @@ defmodule Fortune do
   end
 
   defp handle_circle_midpoint(rect, queue, midpoint, triple, sweep_line_y) do
+    IO.puts "handle circle midpoint for triple, midpoint"
+    IO.inspect triple
+    IO.inspect midpoint
     radius = Geometry.distance(midpoint, Enum.at(triple,0))
 
     cond do
       midpoint.y - radius < sweep_line_y ->
+        IO.puts "ading new vertex event to queue"
+        IO.inspect queue
         EventQueue.push(queue, rect.size.height - (midpoint.y - radius), triple)
       true -> queue
     end

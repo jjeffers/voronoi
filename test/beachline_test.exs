@@ -2,6 +2,14 @@ defmodule BeachlineTest do
   use ExUnit.Case
   doctest Beachline
 
+  test "a site falls to the 'left' of the first arc" do
+    arc = %Point{ x: 2, y: 5.449 }
+    site = %Point{ x: 0, y: 1.586 }
+
+    assert [%Point{x: 2, y: 5.449}, %Point{x: 4.45, y: 3}, %Point{x: 2, y: 5.449}]
+      |> Beachline.find_arc(site, site.y) == [ index: 0, arc: arc ]
+  end
+
   test "a beachline with a single arc contains any new single site" do
     arc = %Point{ x: 10, y: 100 }
     site = %Point{ x: 6, y: 80 }
