@@ -2,6 +2,10 @@ defmodule Line do
   defstruct origin: %Point{}, destination: %Point{}
 end
 
+defmodule HalfEdge do
+  defstruct origin: %Point{}
+end
+
 defimpl String.Chars, for: Point do
   def to_string(point) do
     "(#{point.x},#{point.y})"
@@ -104,10 +108,7 @@ defmodule Geometry do
   end
 
   def circle(a, b, c) do
-    cond do
-      colinear(a, b, c) -> false
-      true -> compute_midpoint(a, b, c)
-    end
+    compute_midpoint(a, b, c)
   end
 
   def compute_midpoint(point_a, point_b, point_c) do

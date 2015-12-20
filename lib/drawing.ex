@@ -4,13 +4,15 @@ defmodule Drawing do
     canvas = Canvas.size(%Size{height: rect.size.height, width: rect.size.width}) |>
         Canvas.fill(color: Color.named(:white))
 
+    draw_points(canvas, points, :blue)
+  end
+
+  def draw_points(canvas, points, color) do
     Enum.reduce points, canvas, fn point, acc ->
-      Canvas.fill(acc, color: Color.named(:blue),
+      Canvas.fill(acc, color: Color.named(color),
                      rect: %Rect{ size: %Size{height: 1, width: 1},
                    origin: %Point{ x: point.x, y: point.y }})
       end
-
-
   end
 
   defp draw_sweep_line(canvas, line_width, line_position) do

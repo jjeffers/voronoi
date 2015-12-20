@@ -47,15 +47,15 @@ defmodule Fortune do
       EventQueue.push(acc, rect.size.height - point.y, point)
     end
 
-    sweep(rect, EventQueue.pop(queue), [], [])
+    sweep(rect, EventQueue.pop(queue), [], [], [])
   end
 
-  def sweep(rect, {:empty, _}, beachline, voronoi_diagram) do
-    voronoi_diagram
+  def sweep(rect, {:empty, _}, beachline, voronoi_vertices, voronoi_edges) do
+    %{ vertices: voronoi_vertices, edges: voronoi_edges }
   end
 
   def sweep(rect, {{:value, priority, [arc_a, arc_b, arc_c]}, queue}, beachline,
-    voronoi_diagram) do
+    voronoi_vertices, voronoi_edges) do
 
     IO.puts "\nvertex event priority #{priority}, removing arc:"
     IO.inspect arc_b
@@ -98,11 +98,12 @@ defmodule Fortune do
 
     midpoint = Geometry.circle(arc_a, arc_b, arc_c)
 
-    sweep(rect, EventQueue.pop(queue), beachline, [ midpoint | voronoi_diagram])
+    sweep(rect, EventQueue.pop(queue), beachline,
+      [ midpoint | voronoi_vertices], [ %HalfEdge{ voronoi_edges)
   end
 
 
-  def sweep(rect, {{:value, priority, site}, queue}, beachline, voronoi_diagram) do
+  def sweep(rect, {{:value, priority, site}, queue}, beachline, voronoi_diagram, voronoi_edges) do
 
     IO.puts "\nsite event #{site.x},#{site.y} - priority #{priority}"
 
@@ -130,7 +131,7 @@ defmodule Fortune do
 
     #Drawing.draw_frame(canvas, rect.size.width, site.y, new_beachline, current_frame)
 
-    sweep(rect, EventQueue.pop(queue), new_beachline, voronoi_diagram)
+    sweep(rect, EventQueue.pop(queue), new_beachline, voronoi_diagram, voronoi_edges)
   end
 
   def generate_vertex_events(rect, queue, beachline, indicies, sweep_line_y) do
@@ -145,7 +146,7 @@ defmodule Fortune do
     IO.puts "\tmidarc index #{midarc_index} (checking either side of that arc)"
     cond do
       midarc_index > 0 and midarc_index < Enum.count(beachline)-1 ->
-        IO.puts "\twe have a triple - so we'll create a vertex event"
+
         a = Enum.at(beachline, midarc_index-1)
         b = Enum.at(beachline, midarc_index)
         c = Enum.at(beachline, midarc_index+1)
@@ -157,18 +158,19 @@ defmodule Fortune do
   end
 
   defp handle_circle_midpoint(_, queue, false, _, _) do
+    IO.puts "Those points do not form a circle"
     queue
   end
 
   defp handle_circle_midpoint(rect, queue, midpoint, triple, sweep_line_y) do
-    IO.puts "handle circle midpoint for triple, midpoint"
+    IO.puts "\thandle circle midpoint for triple, midpoint"
     IO.inspect triple
     IO.inspect midpoint
     radius = Geometry.distance(midpoint, Enum.at(triple,0))
 
     cond do
       midpoint.y - radius < sweep_line_y ->
-        IO.puts "ading new vertex event to queue"
+        IO.puts "\t\tading new vertex event to queue"
         IO.inspect queue
         EventQueue.push(queue, rect.size.height - (midpoint.y - radius), triple)
       true -> queue
